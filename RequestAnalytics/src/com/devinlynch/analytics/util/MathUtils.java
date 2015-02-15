@@ -17,7 +17,7 @@ public class MathUtils {
 		  return sum;
 	}
 	
-	public static long calculateMedian(List<Integer> marks) {
+	public static int calculateMedian(List<Integer> marks) {
 		List<Integer> temp = new ArrayList<Integer>(marks);
 		Collections.sort(temp);
 		if(temp.isEmpty())
