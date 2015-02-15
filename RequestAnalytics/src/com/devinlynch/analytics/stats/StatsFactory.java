@@ -7,7 +7,7 @@ import com.devinlynch.analytics.RequestAnalytics;
 
 public class StatsFactory {
 
-	public Stats createStats(SessionFactory sessionFactory, RequestAnalytics requestAnalytics) {
+	public static Stats createStats(SessionFactory sessionFactory, RequestAnalytics requestAnalytics) {
 		Statistics statistics = sessionFactory.getStatistics();
 		
 		Stats newStats = new Stats();

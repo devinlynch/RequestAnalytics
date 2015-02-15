@@ -20,6 +20,10 @@ public class PersistedFileAnalyticsContext extends InMemoryRequestAnalyticsConte
 	private long millisecondWaitBetweenPersists;
 	private static Boolean MAP_CHANGED = false;
 	
+	public PersistedFileAnalyticsContext() {
+		this("requestAnalytsics", 5000);
+	}
+	
 	public PersistedFileAnalyticsContext(String filePath, long millisecondWaitBetweenPersists) {
 		super();
 		try {

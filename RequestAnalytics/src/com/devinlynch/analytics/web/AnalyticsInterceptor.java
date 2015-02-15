@@ -13,7 +13,7 @@ public class AnalyticsInterceptor extends HandlerInterceptorAdapter {
 	private RequestAnalytics analytics;
 	
 	public AnalyticsInterceptor() {
-		analytics = new RequestAnalytics(new PersistedFileAnalyticsContext("requestAnalytsics", 5000));
+		analytics = new RequestAnalytics(new PersistedFileAnalyticsContext());
 	}
 	
 	

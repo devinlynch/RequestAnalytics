@@ -11,6 +11,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import com.devinlynch.analytics.context.LoggingContext;
+import com.devinlynch.analytics.context.PersistedFileAnalyticsContext;
 import com.devinlynch.analytics.context.RequestAnalyticsContext;
 import com.devinlynch.analytics.context.SystemLoggingContext;
 import com.devinlynch.analytics.util.MathUtils;
@@ -33,6 +34,17 @@ public class RequestAnalytics {
 		if(context == null)
 			throw new RuntimeException("Context cannt be null");
 		this.context = context;
+	}
+	
+	private static RequestAnalytics _instance;
+	private static Object monitor = new Object();
+	public static RequestAnalytics getPersistedInstance() {
+		synchronized (monitor) {
+			if(_instance == null) {
+				_instance = new RequestAnalytics(new PersistedFileAnalyticsContext());
+			}
+		}
+		return _instance;
 	}
 	
 	public void logRequestStarted(HttpServletRequest request) {

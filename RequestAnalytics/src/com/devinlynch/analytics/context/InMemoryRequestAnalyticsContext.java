@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.devinlynch.analytics.util.MathUtils;
-
 /**
  * Stores the values in memory, nothing is persisted.
  * @author devinlynch
