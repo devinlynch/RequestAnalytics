@@ -1,5 +1,14 @@
 package com.devinlynch.analytics.stats;
 
+import com.devinlynch.analytics.RequestAnalytics;
+
+/**
+ * Contains statistics about request times of the server calculated and logged
+ * using {@link RequestAnalytics} and also has information about database 
+ * statistics.
+ * @author devinlynch
+ *
+ */
 public class Stats {
 	private long databaseQueryExecutionCount;
 	private long databaseQueryExecutionMaxTime;

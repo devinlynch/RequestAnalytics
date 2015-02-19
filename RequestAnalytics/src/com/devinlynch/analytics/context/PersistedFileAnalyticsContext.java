@@ -62,6 +62,12 @@ public class PersistedFileAnalyticsContext extends InMemoryRequestAnalyticsConte
 		this.filePath = filePath;
 	}
 	
+	@Override
+	public void reset() {
+		super.reset();
+		MAP_CHANGED = true;
+	}
+	
 	private class Persister extends Thread {
 		@Override 
 		public void run() {

@@ -47,6 +47,10 @@ public class RequestAnalytics {
 		return _instance;
 	}
 	
+	/**
+	 * Call this when a {@link HttpServletRequest} is beginning to be processed
+	 * @param request
+	 */
 	public void logRequestStarted(HttpServletRequest request) {
 		String id = getNewId();
 		Long startTime = new Date().getTime();
@@ -57,6 +61,10 @@ public class RequestAnalytics {
 		getLoggingContext().log("REQUEST ["+id+"] STARTED - URL ["+url+"]");
 	}
 	
+	/**
+	 * Call this when a {@link HttpServletRequest} is finished being processed
+	 * @param request
+	 */
 	public void logRequestFinished(HttpServletRequest request) {
 		String id = (String) request.getAttribute(SESSION_ATTRIBUTE_NAME_ID);
 		if(id == null)
@@ -68,6 +76,145 @@ public class RequestAnalytics {
 
 		context.saveRequestTime(url, (int)time);
 		getLoggingContext().log("REQUEST ["+id+"] ENDED - TOOK ["+time+"ms] - AVERAGE ["+getAverageRequestTime(url)+"ms] MEDIAN ["+getMedianRequestTime(url)+"ms]");
+	}
+	
+	/**
+	 * Returns the average request time for the given URL
+	 * @param url
+	 * @return
+	 */
+	public double getAverageRequestTime(String url) {
+		List<Integer> list = context.getRequestTimes().get(url);
+		if(list == null)
+			return -1;
+		
+		return MathUtils.calculateAverage(list);
+	}
+	
+	/**
+	 * Returns the median request time for the given URL
+	 * @param url
+	 * @return
+	 */
+	public int getMedianRequestTime(String url) {
+		List<Integer> list = context.getRequestTimes().get(url);
+		if(list == null)
+			return -1;
+		
+		return MathUtils.calculateMedian(list);
+	}
+	
+	/**
+	 * Returns the average request time of all URLs logged
+	 * @return
+	 */
+	public double getAverageRequestTime() {
+		return MathUtils.calculateAverage(getAllRequestTimes());
+	}
+	
+	/**
+	 * Returns the median request time of all URLs logged
+	 * @return
+	 */
+	public int getMedianRequestTime(){
+		return MathUtils.calculateMedian(getAllRequestTimes());
+	}
+	
+	/**
+	 * Returns the URL of that has the slowest median request time
+	 * @return
+	 */
+	public String getSlowestRequestUrl(){
+		int slowestRequestTime = 0;
+		String slowestRequestUrl = null;
+		for(Entry<String, Integer> e: getBreakdownOfRequestUrlsToMedianRequestTimes().entrySet()) {
+			int median = e.getValue();
+			if(median > slowestRequestTime) {
+				slowestRequestTime = median;
+				slowestRequestUrl = e.getKey();
+			}
+		}
+		return slowestRequestUrl;
+	}
+	
+	/**
+	 * Returns the time of the slowest median request time
+	 * @return
+	 */
+	public int getSlowestRequestTime(){
+		String slowestRequestUrl = getSlowestRequestUrl();
+		if(slowestRequestUrl == null)
+			return -1;
+		
+		List<Integer> list = context.getRequestTimes().get(slowestRequestUrl);
+		if(list == null)
+			return -1;
+		return MathUtils.calculateMedian(list);
+	}
+	
+	/**
+	 * Returns the URL that has the fastest median request time
+	 * @return
+	 */
+	public String getFastestRequestUrl(){
+		int fastestRequestTime = Integer.MAX_VALUE;
+		String fastestRequestUrl = null;
+		for(Entry<String, Integer> e: getBreakdownOfRequestUrlsToMedianRequestTimes().entrySet()) {
+			int median = e.getValue();
+			if(median < fastestRequestTime) {
+				fastestRequestTime = median;
+				fastestRequestUrl = e.getKey();
+			}
+		}
+		return fastestRequestUrl;
+	}
+	
+	/**
+	 * Returns the time of the fastest median request time
+	 * @return
+	 */
+	public int getFastestRequestTime(){
+		String fastestRequestUrl = getFastestRequestUrl();
+		if(fastestRequestUrl == null)
+			return -1;
+		
+		List<Integer> list = context.getRequestTimes().get(fastestRequestUrl);
+		if(list == null)
+			return -1;
+		return MathUtils.calculateMedian(list);
+	}
+	
+	/**
+	 * Returns a map with the keys being all logged URLs and the values being the median request
+	 * times of those URLs
+	 * @return
+	 */
+	public Map<String, Integer> getBreakdownOfRequestUrlsToMedianRequestTimes() {
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		for(Entry<String, List<Integer>> e: context.getRequestTimes().entrySet()) {
+			int median = MathUtils.calculateMedian(e.getValue());
+			map.put(e.getKey(), median);
+		}
+		return map;
+	}
+	
+	/**
+	 * Deletes all stored request times.  <b>WARNING:</b> this is not 
+	 * reversible
+	 */
+	public void reset() {
+		context.reset();
+	}
+	
+	
+	public LoggingContext getLoggingContext() {
+		if(loggingContext == null)
+			return new SystemLoggingContext();
+		return loggingContext;
+	}
+
+	public void setLoggingContext(LoggingContext loggingContext) {
+		this.loggingContext = loggingContext;
 	}
 	
 	private static String getFullURL(HttpServletRequest request) {
@@ -86,60 +233,6 @@ public class RequestAnalytics {
 		return (new Date()).getTime() + "-"+ idCounter + "-" + UUID.randomUUID().toString();
 	}
 
-	public LoggingContext getLoggingContext() {
-		if(loggingContext == null)
-			return new SystemLoggingContext();
-		return loggingContext;
-	}
-
-	public void setLoggingContext(LoggingContext loggingContext) {
-		this.loggingContext = loggingContext;
-	}
-	
-	public double getAverageRequestTime(String url) {
-		List<Integer> list = context.getRequestTimes().get(url);
-		if(list == null)
-			return -1;
-		
-		return MathUtils.calculateAverage(list);
-	}
-	
-	public int getMedianRequestTime(String url) {
-		List<Integer> list = context.getRequestTimes().get(url);
-		if(list == null)
-			return -1;
-		
-		return MathUtils.calculateMedian(list);
-	}
-	
-	public double getAverageRequestTime() {
-		return MathUtils.calculateAverage(getAllRequestTimes());
-	}
-	public int getMedianRequestTime(){
-		return MathUtils.calculateMedian(getAllRequestTimes());
-	}
-	public String getSlowestRequestUrl(){
-		int slowestRequestTime = 0;
-		String slowestRequestUrl = null;
-		for(Entry<String, Integer> e: getBreakdownOfRequestUrlsToMedianRequestTimes().entrySet()) {
-			int median = e.getValue();
-			if(median > slowestRequestTime) {
-				slowestRequestTime = median;
-				slowestRequestUrl = e.getKey();
-			}
-		}
-		return slowestRequestUrl;
-	}
-	public int getSlowestRequestTime(){
-		String slowestRequestUrl = getSlowestRequestUrl();
-		if(slowestRequestUrl == null)
-			return -1;
-		
-		List<Integer> list = context.getRequestTimes().get(slowestRequestUrl);
-		if(list == null)
-			return -1;
-		return MathUtils.calculateMedian(list);
-	}
 	private List<Integer> getAllRequestTimes() {
 		List<Integer> allRequestTimes = new ArrayList<Integer>();
 		for(Entry<String, List<Integer>> e: context.getRequestTimes().entrySet()) {
@@ -147,37 +240,4 @@ public class RequestAnalytics {
 		}
 		return allRequestTimes;
 	}
-	
-	public String getFastestRequestUrl(){
-		int fastestRequestTime = Integer.MAX_VALUE;
-		String fastestRequestUrl = null;
-		for(Entry<String, Integer> e: getBreakdownOfRequestUrlsToMedianRequestTimes().entrySet()) {
-			int median = e.getValue();
-			if(median < fastestRequestTime) {
-				fastestRequestTime = median;
-				fastestRequestUrl = e.getKey();
-			}
-		}
-		return fastestRequestUrl;
-	}
-	public int getFastestRequestTime(){
-		String fastestRequestUrl = getFastestRequestUrl();
-		if(fastestRequestUrl == null)
-			return -1;
-		
-		List<Integer> list = context.getRequestTimes().get(fastestRequestUrl);
-		if(list == null)
-			return -1;
-		return MathUtils.calculateMedian(list);
-	}
-	
-	public Map<String, Integer> getBreakdownOfRequestUrlsToMedianRequestTimes() {
-		Map<String, Integer> map = new HashMap<String, Integer>();
-		for(Entry<String, List<Integer>> e: context.getRequestTimes().entrySet()) {
-			int median = MathUtils.calculateMedian(e.getValue());
-			map.put(e.getKey(), median);
-		}
-		return map;
-	}
-
 }

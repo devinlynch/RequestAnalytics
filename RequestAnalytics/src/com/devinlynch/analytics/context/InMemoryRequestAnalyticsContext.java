@@ -31,4 +31,9 @@ public class InMemoryRequestAnalyticsContext implements RequestAnalyticsContext 
 		return map;
 	}
 
+	@Override
+	public void reset() {
+		map.clear();
+	}
+
 }

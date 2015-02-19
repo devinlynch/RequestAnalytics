@@ -7,9 +7,14 @@ import com.devinlynch.analytics.RequestAnalytics;
 
 public class StatsFactory {
 
+	/**
+	 * Creates a {@link Stats} object given a Hibernate {@link SessionFactory} and {@link RequestAnalytics}
+	 * @param sessionFactory
+	 * @param requestAnalytics
+	 * @return
+	 */
 	public static Stats createStats(SessionFactory sessionFactory, RequestAnalytics requestAnalytics) {
 		Statistics statistics = sessionFactory.getStatistics();
-		
 		Stats newStats = new Stats();
 		newStats.setDatabaseQueryCacheHitCount(statistics.getQueryCacheHitCount());
 		newStats.setDatabaseQueryExecutionCount(statistics.getQueryExecutionCount());
@@ -24,5 +29,15 @@ public class StatsFactory {
 		newStats.setFastestUrlRequestMedianTime(requestAnalytics.getFastestRequestTime());
 		
 		return newStats;
+	}
+	
+	/**
+	 * Resets all Hibernate statistics and {@link RequestAnalytics} analytics
+	 * @param sessionFactory
+	 * @param requestAnalytics
+	 */
+	public static void resetStatistics(SessionFactory sessionFactory, RequestAnalytics requestAnalytics) {
+		requestAnalytics.reset();
+		sessionFactory.getStatistics().clear();
 	}
 }

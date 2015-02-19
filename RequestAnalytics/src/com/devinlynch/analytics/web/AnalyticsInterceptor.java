@@ -7,13 +7,13 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.devinlynch.analytics.RequestAnalytics;
-import com.devinlynch.analytics.context.PersistedFileAnalyticsContext;
 
 public class AnalyticsInterceptor extends HandlerInterceptorAdapter {
 	private RequestAnalytics analytics;
+	private static String ANALYTICS_IGNORE = "ANALYTICS_IGNORE";
 	
 	public AnalyticsInterceptor() {
-		analytics = new RequestAnalytics(new PersistedFileAnalyticsContext());
+		analytics = RequestAnalytics.getPersistedInstance();
 	}
 	
 	
@@ -22,6 +22,9 @@ public class AnalyticsInterceptor extends HandlerInterceptorAdapter {
             HttpServletRequest request,
             HttpServletResponse response,
             Object handler) throws Exception {
+		if(shouldNotLog(request)) {
+			return true;
+		}
 		analytics.logRequestStarted(request);
 			
 		return true;
@@ -33,7 +36,13 @@ public class AnalyticsInterceptor extends HandlerInterceptorAdapter {
 			HttpServletResponse response, 
 			Object handler, 
 			ModelAndView modelAndView) {
-		
+		if(shouldNotLog(request)) {
+			return;
+		}
 		analytics.logRequestFinished(request);
+	}
+	
+	public boolean shouldNotLog(HttpServletRequest request) {
+		return request.getParameter(ANALYTICS_IGNORE) != null && request.getParameter(ANALYTICS_IGNORE).equals("true");
 	}
 }
