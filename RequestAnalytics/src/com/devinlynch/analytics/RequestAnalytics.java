@@ -240,4 +240,12 @@ public class RequestAnalytics {
 		}
 		return allRequestTimes;
 	}
+	
+	public long getTotalRequestTime() {
+		long l = 0l;
+		for(Integer i : getAllRequestTimes()) {
+			l+=i;
+		}
+		return l;
+	}
 }

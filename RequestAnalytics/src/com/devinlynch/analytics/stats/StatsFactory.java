@@ -27,6 +27,7 @@ public class StatsFactory {
 		newStats.setSlowestUrlRequestMedianTime(requestAnalytics.getSlowestRequestTime());
 		newStats.setFastestUrlRequest(requestAnalytics.getFastestRequestUrl());
 		newStats.setFastestUrlRequestMedianTime(requestAnalytics.getFastestRequestTime());
+		newStats.setTotalRequestTime(requestAnalytics.getTotalRequestTime());
 		
 		return newStats;
 	}

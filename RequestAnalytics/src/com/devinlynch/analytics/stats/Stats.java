@@ -20,6 +20,7 @@ public class Stats {
 	private long slowestUrlRequestMedianTime;
 	private String fastestUrlRequest;
 	private long fastestUrlRequestMedianTime;
+	private long totalRequestTime;
 	
 	public long getDatabaseQueryExecutionCount() {
 		return databaseQueryExecutionCount;
@@ -80,6 +81,12 @@ public class Stats {
 	}
 	public void setSlowestUrlRequestMedianTime(long slowestUrlRequestMedianTime) {
 		this.slowestUrlRequestMedianTime = slowestUrlRequestMedianTime;
+	}
+	public long getTotalRequestTime() {
+		return totalRequestTime;
+	}
+	public void setTotalRequestTime(long totalRequestTime) {
+		this.totalRequestTime = totalRequestTime;
 	}
 	
 	
