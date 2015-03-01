@@ -23,7 +23,7 @@ import com.devinlynch.analytics.util.MathUtils;
  * @author devinlynch
  *
  */
-public class RequestAnalytics {
+public class RequestAnalytics implements IRequestAnalytics {
 	private int idCounter = 0;
 	private static final String SESSION_ATTRIBUTE_NAME_ID = "__COM.DEVINLYNCH.ANALYTICS.REQUEST_ANALYTICS_ID__";
 	private static final String SESSION_ATTRIBUTE_NAME_START_TIME = "__COM.DEVINLYNCH.ANALYTICS.REQUEST_ANALYTICS_START_TIME__";
@@ -47,10 +47,10 @@ public class RequestAnalytics {
 		return _instance;
 	}
 	
-	/**
-	 * Call this when a {@link HttpServletRequest} is beginning to be processed
-	 * @param request
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#logRequestStarted(javax.servlet.http.HttpServletRequest)
 	 */
+	@Override
 	public void logRequestStarted(HttpServletRequest request) {
 		String id = getNewId();
 		Long startTime = new Date().getTime();
@@ -61,10 +61,10 @@ public class RequestAnalytics {
 		getLoggingContext().log("REQUEST ["+id+"] STARTED - URL ["+url+"]");
 	}
 	
-	/**
-	 * Call this when a {@link HttpServletRequest} is finished being processed
-	 * @param request
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#logRequestFinished(javax.servlet.http.HttpServletRequest)
 	 */
+	@Override
 	public void logRequestFinished(HttpServletRequest request) {
 		String id = (String) request.getAttribute(SESSION_ATTRIBUTE_NAME_ID);
 		if(id == null)
@@ -78,11 +78,10 @@ public class RequestAnalytics {
 		getLoggingContext().log("REQUEST ["+id+"] ENDED - TOOK ["+time+"ms] - AVERAGE ["+getAverageRequestTime(url)+"ms] MEDIAN ["+getMedianRequestTime(url)+"ms]");
 	}
 	
-	/**
-	 * Returns the average request time for the given URL
-	 * @param url
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getAverageRequestTime(java.lang.String)
 	 */
+	@Override
 	public double getAverageRequestTime(String url) {
 		List<Integer> list = context.getRequestTimes().get(url);
 		if(list == null)
@@ -91,11 +90,10 @@ public class RequestAnalytics {
 		return MathUtils.calculateAverage(list);
 	}
 	
-	/**
-	 * Returns the median request time for the given URL
-	 * @param url
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getMedianRequestTime(java.lang.String)
 	 */
+	@Override
 	public int getMedianRequestTime(String url) {
 		List<Integer> list = context.getRequestTimes().get(url);
 		if(list == null)
@@ -104,26 +102,26 @@ public class RequestAnalytics {
 		return MathUtils.calculateMedian(list);
 	}
 	
-	/**
-	 * Returns the average request time of all URLs logged
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getAverageRequestTime()
 	 */
+	@Override
 	public double getAverageRequestTime() {
 		return MathUtils.calculateAverage(getAllRequestTimes());
 	}
 	
-	/**
-	 * Returns the median request time of all URLs logged
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getMedianRequestTime()
 	 */
+	@Override
 	public int getMedianRequestTime(){
 		return MathUtils.calculateMedian(getAllRequestTimes());
 	}
 	
-	/**
-	 * Returns the URL of that has the slowest median request time
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getSlowestRequestUrl()
 	 */
+	@Override
 	public String getSlowestRequestUrl(){
 		int slowestRequestTime = 0;
 		String slowestRequestUrl = null;
@@ -137,10 +135,10 @@ public class RequestAnalytics {
 		return slowestRequestUrl;
 	}
 	
-	/**
-	 * Returns the time of the slowest median request time
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getSlowestRequestTime()
 	 */
+	@Override
 	public int getSlowestRequestTime(){
 		String slowestRequestUrl = getSlowestRequestUrl();
 		if(slowestRequestUrl == null)
@@ -152,10 +150,10 @@ public class RequestAnalytics {
 		return MathUtils.calculateMedian(list);
 	}
 	
-	/**
-	 * Returns the URL that has the fastest median request time
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getFastestRequestUrl()
 	 */
+	@Override
 	public String getFastestRequestUrl(){
 		int fastestRequestTime = Integer.MAX_VALUE;
 		String fastestRequestUrl = null;
@@ -169,10 +167,10 @@ public class RequestAnalytics {
 		return fastestRequestUrl;
 	}
 	
-	/**
-	 * Returns the time of the fastest median request time
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getFastestRequestTime()
 	 */
+	@Override
 	public int getFastestRequestTime(){
 		String fastestRequestUrl = getFastestRequestUrl();
 		if(fastestRequestUrl == null)
@@ -184,11 +182,10 @@ public class RequestAnalytics {
 		return MathUtils.calculateMedian(list);
 	}
 	
-	/**
-	 * Returns a map with the keys being all logged URLs and the values being the median request
-	 * times of those URLs
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getBreakdownOfRequestUrlsToMedianRequestTimes()
 	 */
+	@Override
 	public Map<String, Integer> getBreakdownOfRequestUrlsToMedianRequestTimes() {
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		for(Entry<String, List<Integer>> e: context.getRequestTimes().entrySet()) {
@@ -198,15 +195,19 @@ public class RequestAnalytics {
 		return map;
 	}
 	
-	/**
-	 * Deletes all stored request times.  <b>WARNING:</b> this is not 
-	 * reversible
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#reset()
 	 */
+	@Override
 	public void reset() {
 		context.reset();
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getLoggingContext()
+	 */
+	@Override
 	public LoggingContext getLoggingContext() {
 		if(loggingContext == null)
 			return new SystemLoggingContext();
@@ -241,6 +242,10 @@ public class RequestAnalytics {
 		return allRequestTimes;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.devinlynch.analytics.IRequestAnalytics#getTotalRequestTime()
+	 */
+	@Override
 	public long getTotalRequestTime() {
 		long l = 0l;
 		for(Integer i : getAllRequestTimes()) {
