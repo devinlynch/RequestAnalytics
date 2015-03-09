@@ -4,6 +4,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 
 import com.devinlynch.analytics.RequestAnalytics;
+import com.devinlynch.analytics.hibernate.StatsHibernateInterceptor;
 
 public class StatsFactory {
 
@@ -20,6 +21,7 @@ public class StatsFactory {
 		newStats.setDatabaseQueryExecutionCount(statistics.getQueryExecutionCount());
 		newStats.setDatabaseQueryExecutionMaxTime(statistics.getQueryExecutionMaxTime());
 		newStats.setSlowestDatabaseQuery(statistics.getQueryExecutionMaxTimeQueryString());
+		newStats.setDatabaseNumberOfPreparedStatements(StatsHibernateInterceptor.getNumberOfPreparedStatements());
 		
 		newStats.setMeanUrlRequestTime(requestAnalytics.getAverageRequestTime());
 		newStats.setMedianUrlRequestTime(requestAnalytics.getMedianRequestTime());

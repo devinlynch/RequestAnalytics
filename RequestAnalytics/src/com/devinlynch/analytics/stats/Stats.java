@@ -21,6 +21,7 @@ public class Stats {
 	private String fastestUrlRequest;
 	private long fastestUrlRequestMedianTime;
 	private long totalRequestTime;
+	private long databaseNumberOfPreparedStatements;
 	
 	public long getDatabaseQueryExecutionCount() {
 		return databaseQueryExecutionCount;
@@ -87,6 +88,13 @@ public class Stats {
 	}
 	public void setTotalRequestTime(long totalRequestTime) {
 		this.totalRequestTime = totalRequestTime;
+	}
+	public long getDatabaseNumberOfPreparedStatements() {
+		return databaseNumberOfPreparedStatements;
+	}
+	public void setDatabaseNumberOfPreparedStatements(
+			long databaseNumberOfPreparedStatements) {
+		this.databaseNumberOfPreparedStatements = databaseNumberOfPreparedStatements;
 	}
 	
 	
