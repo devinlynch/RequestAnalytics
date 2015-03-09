@@ -27,6 +27,12 @@ public class StatsHibernateInterceptor implements InvocationHandler {
 		return numberOfQueries;
 	}
 	
+	public static void resetPreparedStatementCount() {
+		synchronized (monitor) {
+			numberOfQueries = 0;
+		}
+	}
+	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args)
 			throws Throwable {

@@ -42,5 +42,6 @@ public class StatsFactory {
 	public static void resetStatistics(SessionFactory sessionFactory, RequestAnalytics requestAnalytics) {
 		requestAnalytics.reset();
 		sessionFactory.getStatistics().clear();
+		StatsHibernateInterceptor.resetPreparedStatementCount();
 	}
 }
